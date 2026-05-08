@@ -21,10 +21,10 @@ def get_analytics():
     total = len(df)
     done  = int(np.sum(df['status'] == 'completed'))
     return {
-        'total':          total,
-        'completed':      done,
-        'pending':        int(np.sum(df['status'] == 'pending')),
-        'in_progress':    int(np.sum(df['status'] == 'in_progress')),
+        'total': total,
+        'completed': done,
+        'pending': int(np.sum(df['status'] == 'pending')),
+        'in_progress': int(np.sum(df['status'] == 'in_progress')),
         'completion_pct': float(np.round(done / total * 100, 1)),
     }
 
@@ -33,23 +33,23 @@ conn = get_conn()
 cur  = conn.cursor()
 cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id         SERIAL PRIMARY KEY,
-        username   VARCHAR(80)  UNIQUE NOT NULL,
-        email      VARCHAR(120) UNIQUE NOT NULL,
-        password   VARCHAR(120) NOT NULL,
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(80)  UNIQUE NOT NULL,
+        email VARCHAR(120) UNIQUE NOT NULL,
+        password VARCHAR(120) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
 """)
 cur.execute("""
     CREATE TABLE IF NOT EXISTS tasks (
-        id          SERIAL PRIMARY KEY,
-        user_id     INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        title       VARCHAR(200) NOT NULL,
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(200) NOT NULL,
         description TEXT,
-        priority    VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
-        status      VARCHAR(20) DEFAULT 'pending' CHECK (status  IN ('pending','in_progress','completed')),
-        created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
+        status VARCHAR(20) DEFAULT 'pending' CHECK (status  IN ('pending','in_progress','completed')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
 """)
 conn.commit()
