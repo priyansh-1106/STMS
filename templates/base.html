@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskFlow{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-deep:     #020818;
+            --bg-dark:     #060f2e;
+            --bg-mid:      #0b1a4a;
+            --bg-card:     #0d1f56;
+            --bg-card2:    #0f2470;
+            --border:      rgba(99,160,255,0.15);
+            --border-glow: rgba(99,160,255,0.35);
+            --accent:      #4f8fff;
+            --accent2:     #00c6ff;
+            --accent3:     #7b5ea7;
+            --text:        #e8eeff;
+            --text-muted:  #7a90c4;
+            --text-dim:    #3a4f8a;
+            --high:        #ff5c6a;
+            --medium:      #ffa94d;
+            --low:         #63e6be;
+            --success:     #51cf66;
+            --radius:      12px;
+            --radius-lg:   20px;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Sora', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        body {
+            background:
+                radial-gradient(ellipse 80% 60% at 10% 0%, rgba(15,36,112,0.9) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 90% 100%, rgba(11,26,74,0.8) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(6,15,46,0.6) 0%, transparent 70%),
+                linear-gradient(160deg, #020818 0%, #060f2e 40%, #040d24 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        /* ── NOISE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-card2); border-radius: 3px; }
+
+        /* ── FLASH MESSAGES ── */
+        .flash-wrap {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 340px;
+        }
+        .flash {
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            backdrop-filter: blur(20px);
+            border: 1px solid;
+            animation: slideIn .3s ease;
+        }
+        .flash.success { background: rgba(81,207,102,0.12); border-color: rgba(81,207,102,0.4); color: var(--success); }
+        .flash.error   { background: rgba(255,92,106,0.12); border-color: rgba(255,92,106,0.4); color: var(--high); }
+
+        @keyframes slideIn {
+            from { transform: translateX(30px); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        /* ── UTILITY ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border-radius: var(--radius);
+            font-family: 'Sora', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            text-decoration: none;
+            letter-spacing: 0.02em;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.35);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(37,99,235,0.5); }
+        .btn-ghost {
+            background: rgba(99,160,255,0.08);
+            color: var(--accent);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: rgba(99,160,255,0.15); }
+        .btn-danger {
+            background: rgba(255,92,106,0.12);
+            color: var(--high);
+            border: 1px solid rgba(255,92,106,0.25);
+        }
+        .btn-danger:hover { background: rgba(255,92,106,0.22); }
+        .btn-sm { padding: 7px 14px; font-size: 0.78rem; }
+
+        input, select, textarea {
+            width: 100%;
+            background: rgba(13,31,86,0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: 'Sora', sans-serif;
+            font-size: 0.9rem;
+            padding: 12px 16px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,143,255,0.12);
+        }
+        select option { background: var(--bg-mid); }
+        textarea { resize: vertical; min-height: 80px; }
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .form-group { margin-bottom: 18px; }
+
+        .card {
+            background: linear-gradient(135deg, rgba(13,31,86,0.7), rgba(11,26,74,0.5));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(20px);
+        }
+        .card:hover { border-color: var(--border-glow); }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .badge-high     { background: rgba(255,92,106,0.15); color: var(--high);   border: 1px solid rgba(255,92,106,0.3); }
+        .badge-medium   { background: rgba(255,169,77,0.15); color: var(--medium); border: 1px solid rgba(255,169,77,0.3); }
+        .badge-low      { background: rgba(99,230,190,0.15); color: var(--low);    border: 1px solid rgba(99,230,190,0.3); }
+        .badge-pending    { background: rgba(120,130,200,0.15); color: #9ba8d6; border: 1px solid rgba(120,130,200,0.3); }
+        .badge-in_progress { background: rgba(0,198,255,0.12); color: var(--accent2); border: 1px solid rgba(0,198,255,0.3); }
+        .badge-completed  { background: rgba(81,207,102,0.12); color: var(--success); border: 1px solid rgba(81,207,102,0.3); }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <div class="flash-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+    </div>
+    {% block content %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.flash').forEach(el => {
+                el.style.transition = 'opacity .5s';
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 3500);
+    </script>
+</body>
+</html>
